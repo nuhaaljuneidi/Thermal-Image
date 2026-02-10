@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Science Teaching Tool</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #FF6B35;
+            --secondary: #004E89;
+            --accent: #FFD23F;
+            --dark: #1A1A2E;
+            --light: #F8F9FA;
+            --blue-cold: #4ECDC4;
+            --red-hot: #FF6B6B;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tab {
+            background: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .content-panel {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .content-panel.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            color: var(--secondary);
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        
+        h3 {
+            color: var(--primary);
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            font-weight: 600;
+        }
+        
+        /* Heat Transfer Animations */
+        .heat-transfer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .transfer-demo {
+            border: 3px solid var(--secondary);
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .transfer-demo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .transfer-demo h3 {
+            margin-top: 0;
+        }
+        
+        .demo-visual {
+            height: 200px;
+            background: white;
+            border-radius: 10px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Conduction Animation */
+        .conduction-demo {
+            background: linear-gradient(90deg, 
+                var(--red-hot) 0%, 
+                var(--red-hot) 20%,
+                #FFB88C 40%,
+                #90CAF9 60%,
+                var(--blue-cold) 80%,
+                var(--blue-cold) 100%
+            );
+        }
+        
+        .wall-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #333;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+        
+        /* Convection Animation */
+        .convection-demo {
+            background: linear-gradient(180deg, var(--blue-cold) 0%, white 50%, var(--red-hot) 100%);
+        }
+        
+        .air-arrow {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            opacity: 0;
+            animation: riseAir 3s ease-in-out infinite;
+        }
+        
+        @keyframes riseAir {
+            0% { bottom: 0; opacity: 0; transform: translateX(0); }
+            50% { opacity: 1; }
+            100% { bottom: 100%; opacity: 0; transform: translateX(20px); }
+        }
+        
+        .air-arrow:nth-child(2) { animation-delay: 0.5s; left: 30%; }
+        .air-arrow:nth-child(3) { animation-delay: 1s; left: 50%; }
+        .air-arrow:nth-child(4) { animation-delay: 1.5s; left: 70%; }
+        
+        .arrow-up {
+            font-size: 2em;
+            color: var(--red-hot);
+        }
+        
+        /* Radiation Animation */
+        .radiation-demo {
+            background: radial-gradient(circle at center, var(--red-hot) 0%, var(--accent) 30%, var(--blue-cold) 100%);
+        }
+        
+        .wave {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--accent);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            animation: radiate 2s ease-out infinite;
+        }
+        
+        .wave:nth-child(2) { animation-delay: 0.5s; }
+        .wave:nth-child(3) { animation-delay: 1s; }
+        .wave:nth-child(4) { animation-delay: 1.5s; }
+        
+        @keyframes radiate {
+            0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+        
+        /* Diagnostic Tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .tools-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .tool-card {
+            background: linear-gradient(135deg, var(--secondary) 0%, #0077be 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .tool-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .tool-card h3 {
+            color: white;
+            margin: 10px 0;
+        }
+        
+        .tool-details {
+            margin-top: 15px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        
+        /* IR Camera Simulator */
+        .ir-simulator {
+            margin-top: 30px;
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+        }
+        
+        .house-diagram {
+            width: 100%;
+            max-width: 800px;
+            height: 500px;
+            margin: 20px auto;
+            background: #e8f4f8;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .house-structure {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 400px;
+        }
+        
+        /* Roof */
+        .roof {
+            position: absolute;
+            top: 0;
+            left: 50px;
+            width: 0;
+            height: 0;
+            border-left: 250px solid transparent;
+            border-right: 250px solid transparent;
+            border-bottom: 120px solid #8B4513;
+        }
+        
+        /* Attic space */
+        .attic-space {
+            position: absolute;
+            top: 80px;
+            left: 150px;
+            width: 300px;
+            height: 40px;
+            background: #D2691E;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            z-index: 10;
+        }
+        
+        .attic-space:hover {
+            border-color: var(--accent);
+            background: rgba(255, 210, 63, 0.8);
+            color: var(--dark);
+        }
+        
+        /* Main house body */
+        .house-body {
+            position: absolute;
+            top: 120px;
+            left: 100px;
+            width: 400px;
+            height: 280px;
+            background: #DEB887;
+            border: 3px solid #8B4513;
+        }
+        
+        /* Windows */
+        .window {
+            position: absolute;
+            background: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 100%);
+            border: 4px solid #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .window:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+            transform: scale(1.05);
+        }
+        
+        .window::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #333;
+        }
+        
+        .window::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #333;
+        }
+        
+        .window-left {
+            top: 40px;
+            left: 40px;
+            width: 70px;
+            height: 90px;
+        }
+        
+        .window-right {
+            top: 40px;
+            right: 40px;
+            width: 70px;
+            height: 90px;
+        }
+        
+        /* Door */
+        .door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 120px;
+            background: linear-gradient(180deg, #654321 0%, #8B4513 100%);
+            border: 4px solid #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .door:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+        }
+        
+        .door::before {
+            content: '🚪';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+        }
+        
+        /* Walls */
+        .wall {
+            position: absolute;
+            background: transparent;
+            border: 3px dashed transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .wall:hover {
+            border-color: var(--accent);
+            background: rgba(255, 210, 63, 0.2);
+            color: var(--dark);
+        }
+        
+        .wall-left {
+            top: 140px;
+            left: 10px;
+            width: 80px;
+            height: 100px;
+        }
+        
+        .wall-right {
+            top: 140px;
+            right: 10px;
+            width: 80px;
+            height: 100px;
+        }
+        
+        /* Basement indicator */
+        .basement-line {
+            position: absolute;
+            bottom: 60px;
+            left: 100px;
+            right: 100px;
+            border-top: 3px dashed #333;
+            padding-top: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .ir-result {
+            position: absolute;
+            background: rgba(26, 26, 46, 0.98);
+            border: 3px solid var(--accent);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 350px;
+            max-width: 450px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            color: white;
+        }
+        
+        .ir-result.active {
+            display: block;
+            animation: popIn 0.3s ease;
+        }
+        
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .ir-result h4 {
+            color: white;
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+        }
+        
+        .ir-result .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .ir-result .close-btn:hover {
+            background: var(--accent);
+            color: var(--dark);
+            transform: scale(1.1);
+        }
+        
+        .ir-reading {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .color-scale {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(90deg, 
+                #1a237e 0%,
+                #3f51b5 20%,
+                #00bcd4 40%,
+                #4caf50 50%,
+                #ffeb3b 60%,
+                #ff9800 80%,
+                #f44336 100%
+            );
+            border-radius: 5px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        /* Problems Gallery */
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .problem-card {
+            background: white;
+            border: 3px solid var(--secondary);
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .problem-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: var(--primary);
+        }
+        
+        .problem-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            color: white;
+        }
+        
+        .problem-content {
+            padding: 20px;
+        }
+        
+        .problem-card h3 {
+            margin-top: 0;
+            color: var(--secondary);
+        }
+        
+        .problem-detail {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .problem-card.expanded .problem-detail {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .label {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--accent);
+            color: var(--dark);
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin: 5px 5px 5px 0;
+        }
+        
+        .label.severity-high {
+            background: #ff4444;
+            color: white;
+        }
+        
+        .label.severity-medium {
+            background: #ffaa00;
+            color: white;
+        }
+        
+        .label.severity-low {
+            background: #00C851;
+            color: white;
+        }
+        
+        /* Instructions */
+        .instruction-box {
+            background: linear-gradient(135deg, #FFD23F 0%, #FFA500 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .heat-transfer-grid,
+            .tools-grid,
+            .problems-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Building Science Teaching Tool</h1>
+            <p>Interactive demonstrations for Engineering Day</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="heat-transfer">Heat Transfer</button>
+            <button class="tab" data-tab="tools">Diagnostic Tools</button>
+            <button class="tab" data-tab="ir-simulator">IR Camera Demo</button>
+            <button class="tab" data-tab="problems">Common Problems</button>
+        </div>
+        
+        <!-- Heat Transfer Panel -->
+        <div class="content-panel active" id="heat-transfer">
+            <h2>How Heat Moves in Buildings</h2>
+            <p class="instruction-box">Click each demonstration to see how heat transfers. Explain: "Heat always moves from hot to cold in three different ways."</p>
+            
+            <div class="heat-transfer-grid">
+                <div class="transfer-demo" onclick="animateConduction()">
+                    <h3>🔥 Conduction</h3>
+                    <div class="demo-visual conduction-demo" id="conduction">
+                        <div class="wall-particles"></div>
+                    </div>
+                    <p><strong>Through Materials:</strong> Heat moving through solid walls, windows, roofs. Like touching a hot pan - heat conducts through the metal.</p>
+                    <p><strong>Example:</strong> "Put your hand on a cold window in winter - you feel heat leaving your hand through the glass."</p>
+                </div>
+                
+                <div class="transfer-demo" onclick="animateConvection()">
+                    <h3>💨 Convection</h3>
+                    <div class="demo-visual convection-demo" id="convection">
+                        <div class="air-arrow" style="left: 10%"><span class="arrow-up">↑</span></div>
+                        <div class="air-arrow" style="left: 30%"><span class="arrow-up">↑</span></div>
+                        <div class="air-arrow" style="left: 50%"><span class="arrow-up">↑</span></div>
+                        <div class="air-arrow" style="left: 70%"><span class="arrow-up">↑</span></div>
+                    </div>
+                    <p><strong>With Moving Air:</strong> Heat carried by air movement. Hot air rises, cold air sinks. Drafts under doors are convection.</p>
+                    <p><strong>Example:</strong> "Ever felt a draft? That's cold air moving in and warm air moving out - that's convection stealing your heat!"</p>
+                </div>
+                
+                <div class="transfer-demo" onclick="animateRadiation()">
+                    <h3>☀️ Radiation</h3>
+                    <div class="demo-visual radiation-demo" id="radiation">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                    <p><strong>Through Space:</strong> Heat moving as invisible waves. Doesn't need to touch anything. Like feeling warmth from the sun or a fireplace.</p>
+                    <p><strong>Example:</strong> "Sun heats your face even though you're not touching it. Same thing happens with windows - sun radiates heat right through the glass!"</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Diagnostic Tools Panel -->
+        <div class="content-panel" id="tools">
+            <h2>Diagnostic Tools</h2>
+            
+            <div class="tools-grid">
+                <div class="tool-card" onclick="toggleToolDetails(this)">
+                    <div class="tool-icon">📸</div>
+                    <h3>IR Camera (Thermal Imaging)</h3>
+                    <div class="tool-details">
+                        <p><strong>What it shows:</strong> Temperature as colors</p>
+                        <p>🔴 Red/Orange = Hot</p>
+                        <p>🔵 Blue/Purple = Cold</p>
+                        <br>
+                        <p><strong>Finds:</strong> Air leaks, missing insulation, thermal bridges</p>
+                        <br>
+                        <p><em>"It's like heat vision goggles - lets you see where heat is escaping that your eyes can't see!"</em></p>
+                        <br>
+                        <div class="color-scale"></div>
+                        <div class="scale-labels">
+                            <span>COLD</span>
+                            <span>MEDIUM</span>
+                            <span>HOT</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tool-card" onclick="toggleToolDetails(this)">
+                    <div class="tool-icon">💧</div>
+                    <h3>Moisture Meter</h3>
+                    <div class="tool-details">
+                        <p><strong>What it measures:</strong> Water content in materials (%)</p>
+                        <br>
+                        <p>✅ 0-15%: Dry (good)</p>
+                        <p>⚠️ 16-20%: Elevated (watch it)</p>
+                        <p>❌ 20%+: WET (problem!)</p>
+                        <br>
+                        <p><strong>Why it matters:</strong> Wet materials grow mold, rot, and insulation stops working</p>
+                        <br>
+                        <p><em>"Like a metal detector, but for water. High numbers mean trouble - mold, rot, and energy waste!"</em></p>
+                    </div>
+                </div>
+                
+                <div class="tool-card" onclick="toggleToolDetails(this)">
+                    <div class="tool-icon">📊</div>
+                    <h3>Temp/Humidity Sensors</h3>
+                    <div class="tool-details">
+                        <p><strong>What it does:</strong> Tracks temperature and humidity over time</p>
+                        <br>
+                        <p><strong>Shows:</strong> Patterns, cycles, when problems happen</p>
+                        <br>
+                        <p><strong>Healthy Range:</strong> 30-50% humidity</p>
+                        <br>
+                        <p><em>"Like a weather station for inside the house - helps us find patterns we'd miss with just one measurement."</em></p>
+                    </div>
+                </div>
+                
+                <div class="tool-card" onclick="toggleToolDetails(this)">
+                    <div class="tool-icon">🌪️</div>
+                    <h3>Blower Door</h3>
+                    <div class="tool-details">
+                        <p><strong>What it does:</strong> Big fan that sucks air out to measure total leakiness</p>
+                        <br>
+                        <p><strong>Results (ACH50):</strong></p>
+                        <p>✅ <3: Tight (good)</p>
+                        <p>⚠️ 3-5: Acceptable</p>
+                        <p>❌ >5: Leaky (needs work)</p>
+                        <br>
+                        <p><strong>Pro tip:</strong> Use with IR camera - makes leaks super obvious!</p>
+                        <br>
+                        <p><em>"Like testing a tire for leaks - create pressure and see where air escapes!"</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- IR Simulator Panel -->
+        <div class="content-panel" id="ir-simulator">
+            <h2>IR Camera Simulator</h2>
+            <p class="instruction-box">Click different parts of the house to show what the IR camera would reveal. Use this to demonstrate how to identify problems!</p>
+            
+            <div class="ir-simulator">
+                <h3 style="color: white; margin-top: 0;">Interactive House Diagram</h3>
+                <p style="color: #aaa; margin-bottom: 20px;">Click on windows, doors, walls, or attic to see IR camera results</p>
+                
+                <div class="house-diagram">
+                    <div class="house-structure">
+                        <!-- Roof -->
+                        <div class="roof"></div>
+                        
+                        <!-- Attic -->
+                        <div class="attic-space" onclick="showIRResult('attic', event)">ATTIC</div>
+                        
+                        <!-- Main house body -->
+                        <div class="house-body">
+                            <!-- Windows -->
+                            <div class="window window-left" onclick="showIRResult('window-left', event)"></div>
+                            <div class="window window-right" onclick="showIRResult('window-right', event)"></div>
+                            
+                            <!-- Door -->
+                            <div class="door" onclick="showIRResult('door', event)"></div>
+                        </div>
+                        
+                        <!-- Walls (clickable areas on sides) -->
+                        <div class="wall wall-left" onclick="showIRResult('wall-left', event)">WALL</div>
+                        <div class="wall wall-right" onclick="showIRResult('wall-right', event)">WALL</div>
+                        
+                        <!-- Basement indicator -->
+                        <div class="basement-line">BASEMENT ↓</div>
+                    </div>
+                </div>
+                
+                <div class="color-scale"></div>
+                <div class="scale-labels">
+                    <span>COLD (air leaks)</span>
+                    <span>NORMAL</span>
+                    <span>HOT</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Common Problems Panel -->
+        <div class="content-panel" id="problems">
+            <h2>Common Building Problems</h2>
+            
+            <div class="problems-grid">
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">❄️</div>
+                    <div class="problem-content">
+                        <h3>Air Leaks Around Windows</h3>
+                        <span class="label severity-high">High Impact</span>
+                        <p>Cold streaks around window frames</p>
+                        <div class="problem-detail">
+                            <p><strong>What IR shows:</strong> Blue/cold lines around window edges</p>
+                            <p><strong>Why it happens:</strong> Weatherstripping fails, gaps in installation</p>
+                            <p><strong>Energy impact:</strong> Can waste 10-20% of heating/cooling</p>
+                            <p><em>"Look for color differences at edges - should be uniform but often shows cold streaks where air sneaks in!"</em></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">🏚️</div>
+                    <div class="problem-content">
+                        <h3>Missing Attic Insulation</h3>
+                        <span class="label severity-high">High Impact</span>
+                        <p>Entire ceiling appears cold</p>
+                        <div class="problem-detail">
+                            <p><strong>What IR shows:</strong> Uniform cold across ceiling, may show joist pattern</p>
+                            <p><strong>Why it happens:</strong> Old insulation settled, never upgraded, removed during work</p>
+                            <p><strong>Energy impact:</strong> 25-35% of heat loss in under-insulated homes</p>
+                            <p><em>"Heat rises! Without good attic insulation, it just escapes right through the roof."</em></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">🚪</div>
+                    <div class="problem-content">
+                        <h3>Attic Hatch Air Leaks</h3>
+                        <span class="label severity-medium">Medium Impact</span>
+                        <p>Cold perimeter around attic access</p>
+                        <div class="problem-detail">
+                            <p><strong>What IR shows:</strong> Cold outline around hatch edges</p>
+                            <p><strong>Why it happens:</strong> No weatherstripping, uninsulated hatch, poor seal</p>
+                            <p><strong>Energy impact:</strong> Small area but big leak - warm air escapes constantly</p>
+                            <p><em>"Look in the hallway ceiling - often see a clear temperature difference around the edges of the hatch."</em></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">💦</div>
+                    <div class="problem-content">
+                        <h3>Basement Moisture</h3>
+                        <span class="label severity-high">High Impact</span>
+                        <p>High moisture readings on walls/floor</p>
+                        <div class="problem-detail">
+                            <p><strong>What moisture meter shows:</strong> >20% on walls or floor</p>
+                            <p><strong>Why it happens:</strong> Poor drainage, foundation cracks, high water table, no waterproofing</p>
+                            <p><strong>Energy impact:</strong> Wet insulation doesn't work, plus mold and rot damage</p>
+                            <p><em>"Use moisture meter on basement walls - numbers above 20% mean water is getting in!"</em></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">🧱</div>
+                    <div class="problem-content">
+                        <h3>Missing Wall Insulation</h3>
+                        <span class="label severity-medium">Medium Impact</span>
+                        <p>Visible stud pattern on IR camera</p>
+                        <div class="problem-detail">
+                            <p><strong>What IR shows:</strong> Vertical cold lines every 16" or 24" (studs)</p>
+                            <p><strong>Why it happens:</strong> Built before insulation requirements, never retrofitted</p>
+                            <p><strong>Energy impact:</strong> Significant heat loss, uncomfortable rooms</p>
+                            <p><em>"See those vertical stripes? That's the wood studs - colder because there's no insulation between them!"</em></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">⚡</div>
+                    <div class="problem-content">
+                        <h3>Electrical Outlet Leaks</h3>
+                        <span class="label severity-low">Lower Impact</span>
+                        <p>Cold spots at outlet locations</p>
+                        <div class="problem-detail">
+                            <p><strong>What IR shows:</strong> Small cold spots where outlets are</p>
+                            <p><strong>Why it happens:</strong> Holes through drywall into wall cavity, not sealed</p>
+                            <p><strong>Energy impact:</strong> Each outlet is small, but houses have many!</p>
+                            <p><em>"Outlets on exterior walls often leak - look for little cold spots."</em></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">🌡️</div>
+                    <div class="problem-content">
+                        <h3>Rim Joist Leaks</h3>
+                        <span class="label severity-high">High Impact</span>
+                        <p>Cold band around basement ceiling perimeter</p>
+                        <div class="problem-detail">
+                            <p><strong>What IR shows:</strong> Horizontal cold stripe where floor meets foundation</p>
+                            <p><strong>Why it happens:</strong> Often completely uninsulated and unsealed</p>
+                            <p><strong>Energy impact:</strong> Large surface area with direct outside exposure</p>
+                            <p><em>"In the basement, look around the perimeter at the ceiling - often see a cold band all the way around."</em></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="problem-card" onclick="toggleProblem(this)">
+                    <div class="problem-image">🔥</div>
+                    <div class="problem-content">
+                        <h3>Duct Leaks</h3>
+                        <span class="label severity-medium">Medium Impact</span>
+                        <p>Hot/cold spots along ductwork</p>
+                        <div class="problem-detail">
+                            <p><strong>What IR shows:</strong> Temperature changes along ducts in attic/crawlspace</p>
+                            <p><strong>Why it happens:</strong> Poor connections, damaged ducts, no sealant</p>
+                            <p><strong>Energy impact:</strong> Can lose 20-30% of heating/cooling to leaks</p>
+                            <p><em>"Look in unconditioned spaces - if you see hot/cold along the duct path, that's conditioned air escaping!"</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs and panels
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding panel
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Heat transfer animations
+        function animateConduction() {
+            const container = document.querySelector('#conduction .wall-particles');
+            container.innerHTML = '';
+            
+            // Create vibrating particles
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = (i * 3.33) + '%';
+                particle.style.top = Math.random() * 90 + '%';
+                
+                // Animate vibration based on position (hot side vibrates more)
+                const vibrationIntensity = (30 - i) / 30;
+                particle.style.animation = `vibrate ${0.5 + Math.random() * 0.5}s infinite`;
+                
+                container.appendChild(particle);
+            }
+            
+            // Add vibration animation if not exists
+            if (!document.querySelector('style[data-vibrate]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-vibrate', 'true');
+                style.textContent = `
+                    @keyframes vibrate {
+                        0%, 100% { transform: translate(0, 0); }
+                        25% { transform: translate(2px, -2px); }
+                        50% { transform: translate(-2px, 2px); }
+                        75% { transform: translate(2px, 2px); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        function animateConvection() {
+            // Already animated via CSS
+            console.log('Convection animation running');
+        }
+        
+        function animateRadiation() {
+            // Already animated via CSS
+            console.log('Radiation animation running');
+        }
+        
+        // Tool details toggle
+        function toggleToolDetails(card) {
+            card.classList.toggle('expanded');
+        }
+        
+        // IR Simulator
+        const irResults = {
+            'attic': {
+                title: 'Attic Area',
+                temp: 'COLD (45°F)',
+                colorGradient: 'linear-gradient(90deg, #1a237e 0%, #3f51b5 100%)',
+                colorLabel: 'Cold - Blue/Purple',
+                problem: 'Missing or inadequate insulation',
+                description: 'The entire attic area shows as cold (blue), indicating heat is escaping through the roof. This is one of the biggest energy losses in most homes!',
+                advice: 'Point out: "See how the whole ceiling is blue? That means heat is escaping right through. We need R-38 to R-60 insulation up there."'
+            },
+            'window-left': {
+                title: 'Left Window',
+                temp: 'COLD EDGES (50°F)',
+                colorGradient: 'linear-gradient(90deg, #3f51b5 0%, #00bcd4 100%)',
+                colorLabel: 'Cold streaks - Blue',
+                problem: 'Air infiltration around window frame',
+                description: 'Cold streaks visible around the window perimeter, especially at corners. This indicates air leaking through gaps between the frame and wall.',
+                advice: 'Point out: "Notice the blue lines around the edges? That\'s cold air sneaking in through gaps. The window itself might be fine, but the installation has leaks."'
+            },
+            'window-right': {
+                title: 'Right Window',
+                temp: 'ENTIRE PANE COLD (48°F)',
+                colorGradient: 'linear-gradient(90deg, #1a237e 0%, #3f51b5 50%, #00bcd4 100%)',
+                colorLabel: 'Uniformly cold - Deep blue',
+                problem: 'Single-pane window - poor insulation value',
+                description: 'The entire window pane appears cold. This is a single-pane window with very low R-value (R-1), allowing massive heat transfer.',
+                advice: 'Point out: "The whole window is blue - not just the edges. This is a single-pane window acting like a hole in the wall. Needs upgrading to double or triple-pane."'
+            },
+            'door': {
+                title: 'Entry Door',
+                temp: 'COLD BOTTOM (52°F)',
+                colorGradient: 'linear-gradient(90deg, #00bcd4 0%, #4caf50 100%)',
+                colorLabel: 'Cool - Cyan/Green',
+                problem: 'Door sweep missing or damaged',
+                description: 'Cold air visible at the bottom of the door where it meets the threshold. Common problem when door sweeps wear out or are missing.',
+                advice: 'Point out: "See that blue line at the bottom? Classic air leak under the door. Simple fix - install a new door sweep."'
+            },
+            'wall-left': {
+                title: 'Left Wall',
+                temp: 'VERTICAL PATTERN (55°F)',
+                colorGradient: 'repeating-linear-gradient(90deg, #00bcd4 0px, #00bcd4 20px, #4caf50 20px, #4caf50 40px)',
+                colorLabel: 'Pattern - Blue stripes',
+                problem: 'Missing cavity insulation + thermal bridging at studs',
+                description: 'Regular vertical cold stripes every 16" indicate the wood studs. Wall cavities between studs lack insulation, and studs act as thermal bridges.',
+                advice: 'Point out: "Those vertical stripes? That\'s the stud pattern - cold because there\'s no insulation between them. This wall needs to be retrofitted with insulation."'
+            },
+            'wall-right': {
+                title: 'Right Wall',
+                temp: 'COLD PATCH (53°F)',
+                colorGradient: 'radial-gradient(circle, #00bcd4 0%, #4caf50 60%, #ffeb3b 100%)',
+                colorLabel: 'Cold spot - Blue patch',
+                problem: 'Localized insulation void',
+                description: 'An irregular cold patch indicates missing or compressed insulation in this specific area. Maybe disturbed during electrical work or never filled properly.',
+                advice: 'Point out: "This cold spot shouldn\'t be here - the rest of the wall is warmer. Probably missing insulation in just this section."'
+            }
+        };
+        
+        function showIRResult(location, event) {
+            // Remove any existing popup
+            const existingPopup = document.querySelector('.ir-result');
+            if (existingPopup) {
+                existingPopup.remove();
+            }
+            
+            const result = irResults[location];
+            if (!result) return;
+            
+            // Create popup
+            const popup = document.createElement('div');
+            popup.className = 'ir-result active';
+            
+            popup.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                <h4>${result.title}</h4>
+                <p style="color: #FFD23F; font-size: 1.2em; font-weight: 600; margin: 5px 0;">
+                    Temperature: ${result.temp}
+                </p>
+                <div style="margin: 15px 0;">
+                    <p style="color: #aaa; margin: 0 0 8px 0; font-size: 0.9em;">IR Camera Shows:</p>
+                    <div style="background: ${result.colorGradient}; height: 40px; border-radius: 8px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>
+                    <p style="color: #ddd; margin: 5px 0; font-size: 0.85em; font-style: italic;">${result.colorLabel}</p>
+                </div>
+                <p style="color: white; font-weight: 600; margin: 10px 0;">
+                    Problem: ${result.problem}
+                </p>
+                <p style="color: #ddd; margin: 10px 0; line-height: 1.5;">
+                    ${result.description}
+                </p>
+                <div style="background: rgba(255,210,63,0.2); padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 3px solid #FFD23F;">
+                    <p style="color: white; margin: 0; font-style: italic;">
+                        💡 ${result.advice}
+                    </p>
+                </div>
+            `;
+            
+            // Get click target element
+            const clickedElement = event ? event.currentTarget : document.querySelector(`[onclick*="${location}"]`);
+            const diagram = document.querySelector('.house-diagram');
+            
+            // Add to diagram
+            diagram.appendChild(popup);
+            
+            // Position near clicked element
+            const rect = clickedElement.getBoundingClientRect();
+            const diagramRect = diagram.getBoundingClientRect();
+            
+            let left = rect.left - diagramRect.left + rect.width + 20;
+            let top = rect.top - diagramRect.top;
+            
+            // Keep popup inside diagram bounds
+            if (left + 450 > diagramRect.width) {
+                left = rect.left - diagramRect.left - 370;
+            }
+            if (top + popup.offsetHeight > diagramRect.height) {
+                top = diagramRect.height - popup.offsetHeight - 20;
+            }
+            if (top < 0) top = 10;
+            
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+        }
+        
+        // Problem cards toggle
+        function toggleProblem(card) {
+            const wasExpanded = card.classList.contains('expanded');
+            
+            // Close all problem cards
+            document.querySelectorAll('.problem-card').forEach(c => {
+                c.classList.remove('expanded');
+            });
+            
+            // If this card wasn't expanded, expand it
+            if (!wasExpanded) {
+                card.classList.add('expanded');
+            }
+        }
+        
+        // Initialize conduction animation on load
+        window.addEventListener('load', function() {
+            animateConduction();
+        });
+    </script>
+</body>
+</html>
